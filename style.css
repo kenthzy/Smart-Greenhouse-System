@@ -128,15 +128,32 @@ li {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding: 15px;
+   body {
+        padding: 20px;
+        margin: 30px;
     }
 
     h1 {
         font-size: 2rem;
     }
 
+    h2 {
+        font-size: 1.75rem;
+    }
+    h3 {
+        font-size: 1.5rem;
+    }
+
     .images {
         grid-template-columns: 1fr;
+    }
+
+    table, pre, .diagram img {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    th, td {
+        padding: 10px;
     }
 }
