@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Greenhouse System</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="icon" type="image/png" href="/assests/images/logo.png">
+</head>
+<body>
+    <h1>Smart Mini Greenhouse: Automated Environmental Control</h1>
+    <div class="images">
+        <img src="/assests/images/view-1.png" height="300px" width="auto">
+        <img src="/assests/images/view-2.png" height="300px" width="auto">
+    </div>
+    <p><em>Figure: 3D Model Isometric View in SketchUp</em></p>
+
+    <h2>Project Overview</h2>
+    <p>This Smart Greenhouse System, developed as a school engineering project, automates plant care by monitoring and adjusting environmental conditions like temperature, humidity, soil moisture, and light. The system combines IoT and automation to simplify indoor farming.</p>
+    <p>In this website, we will guide you through building your own smart greenhouse system, from selecting the right sensors and components to coding and integrating automation features. Whether you're a beginner or an experienced enthusiast, our step-by-step tutorials will help you create a sustainable and efficient greenhouse setup tailored to your needs.</p>
+    <p>Throughout the development process, we encountered several challenges:</p>
+    <ul>
+        <li><strong>Sensor Calibration:</strong> Ensuring accurate and consistent readings from sensors required extensive calibration and testing.</li>
+        <li><strong>Power Management:</strong> Designing a power-efficient system capable of 24/7 operation was crucial, especially for maintaining continuous monitoring and control.</li>
+        <li><strong>Data Synchronization:</strong> Keeping the data synchronized between the ESP32 and the Blynk cloud platform posed challenges, particularly with intermittent connectivity issues.</li>
+        <li><strong>Component Integration:</strong> Integrating various components such as sensors, actuators, and communication modules into a cohesive system required careful planning and troubleshooting.</li>
+        <li><strong>Environmental Factors:</strong> Accounting for environmental factors such as varying light conditions and temperature fluctuations was essential for reliable system performance.</li>
+    </ul>
+    
+    <h3>1. Key Components</h3>
+    <table border="1">
+        <tr>
+            <th>Component</th>
+            <th>Purpose</th>
+        </tr>
+        <tr><td>ESP32 Board</td><td>Central microcontroller for data processing</td></tr>
+        <tr><td>DHT22 Sensor</td><td>Measures temperature & humidity</td></tr>
+        <tr><td>Soil Moisture Sensor</td><td>Detects dry/wet soil conditions</td></tr>
+        <tr><td>Photoresistor</td><td>Monitors ambient light levels</td></tr>
+        <tr><td>Submersible Pump</td><td>Automated irrigation</td></tr>
+        <tr><td>2pcs - 5V Mini Fans</td><td>Temperature & humidity control</td></tr>
+        <tr><td>Blynk IoT Platform</td><td>Remote monitoring & control</td></tr>
+    </table>
+
+    <h3>2. System Architecture</h3>
+    <div class="diagram">
+        <img src="/assests/images/diagram.png" alt="System Diagram" height="300px" width="600px">
+    </div>
+    <p><em>The ESP32 processes sensor data to control actuators, with real-time updates sent to the Blynk cloud for remote access.</em></p>
+
+    <h3>3. Automation Logic</h3>
+    <ul>
+        <li><strong>Watering:</strong> Pump activates when soil moisture < 30%</li>
+        <li><strong>Cooling:</strong> Fan 1 triggers at temperatures > 28°C</li>
+        <li><strong>Humidity Control:</strong> Fan 2 runs at humidity > 70%</li>
+        <li><strong>Lighting:</strong> LED strips activate when ambient light < 50 lux</li>
+    </ul>
+
+    <h3>4. Programming Core</h3>
+        <pre><code>// Sensor Reading Example
+    void readSensors() {
+    humidity = dht.readHumidity();
+    temperature = dht.readTemperature();
+    moisture = analogRead(SOIL_SENSOR);
+            
+    if (moisture < 300) activatePump();
+    if (temperature > 28) activateFan1();
+    }
+</code></pre>
+
+    <h3>5. Remote Monitoring Interface</h3>
+    <p>Using Blynk IoT, we created a dashboard showing real-time sensor data and manual controls:</p>
+    <div class="diagram">
+        <img src="/assests/images/blynk.png" height="300px" width="auto">
+    </div>
+    <ul>
+        <li>Live temperature/humidity gauges</li>
+        <li>Soil moisture percentage display</li>
+        <li>Manual override switches for all actuators</li>
+    </ul>
+
+    <h3>6. Source Code</h3>
+    <p>You can download the source code and instruction from the following links:</p>
+    <ul>
+        <li><a href="/assests/source-code/greenhouse-code.txt" download>Download Source Code</a></li>
+        <li><a href="/assests/source-code/Instruction.pdf" download>Download Complete Instruction</a></li>
+    </ul>
+   
+    
+
+    <h3>7. Future Improvements</h3>
+    <ul>
+        <li>Machine learning for predictive adjustments</li>
+        <li>Solar power integration</li>
+        <li>Mobile app with push notifications</li>
+    </ul>
+
+</body>
+   
+<footer>
+    <h3>About the Creators</h3>
+    <p><em>Kenneth Gonzales and John Martin Corpin led the development. They, along with their fellow 3rd-year Computer Engineering students at Colegio De Montalban, combined their passion for IoT and sustainable agriculture.</em></p>
+</footer>
+</html>
