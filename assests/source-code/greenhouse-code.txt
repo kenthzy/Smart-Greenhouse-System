@@ -1,0 +1,257 @@
+#define BLYNK_TEMPLATE_ID " " 
+#define BLYNK_TEMPLATE_NAME " "
+#define BLYNK_AUTH_TOKEN " "
+
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+#include <DHT.h>
+#include <Ticker.h>  // Include Ticker library
+#include <Wire.h>    // Include Wire library for I2C
+#include <LiquidCrystal_I2C.h>  // Include LiquidCrystal_I2C library
+
+#define DHTPIN 13
+#define DHTTYPE DHT11
+
+#define FAN1_RELAY_PIN 23
+#define FAN2_RELAY_PIN 22
+#define LED_RELAY_PIN 21
+#define PUMP_RELAY_PIN 19
+
+#define LDR_PIN 34
+#define SOIL_SENSOR_PIN 35
+
+DHT dht(DHTPIN, DHTTYPE);
+
+// Define the LCD I2C pins
+#define SDA_PIN 4
+#define SCL_PIN 5
+
+// Try using a different I2C address (0x3F is another common address)
+LiquidCrystal_I2C lcd(0x27, 16, 2);  // Update address to 0x27 or 0x3F if needed
+
+char ssid[] = "HONOR";
+char pass[] = "12345678";
+
+bool fan1Override = false;
+bool fan2Override = false;
+bool ledOverride = false;
+bool pumpOverride = false;
+
+unsigned long fan1OverrideTime = 0;
+unsigned long fan2OverrideTime = 0;
+unsigned long ledOverrideTime = 0;
+unsigned long pumpOverrideTime = 0;
+
+Ticker timer;  // Create a Ticker object
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+
+  pinMode(FAN1_RELAY_PIN, OUTPUT);
+  pinMode(FAN2_RELAY_PIN, OUTPUT);
+  pinMode(LED_RELAY_PIN, OUTPUT);
+  pinMode(PUMP_RELAY_PIN, OUTPUT);
+
+  digitalWrite(FAN1_RELAY_PIN, HIGH);  // Initialize as OFF
+  digitalWrite(FAN2_RELAY_PIN, HIGH);  // Initialize as OFF
+  digitalWrite(LED_RELAY_PIN, HIGH);   // Initialize as OFF
+  digitalWrite(PUMP_RELAY_PIN, HIGH);  // Initialize as OFF
+
+  // Initialize I2C communication with custom pins
+  Wire.begin(SDA_PIN, SCL_PIN);
+  lcd.begin(16, 2);  // Initialize the LCD with 16 columns and 2 rows
+  
+  lcd.setBacklight(true);  // Turn on the backlight
+  lcd.print("Initializing...");
+
+   timer.attach(5000, updateLabels);
+}
+
+void loop() {
+  Blynk.run();
+  manageRelays();
+  updateLCD(); // Update LCD with sensor data
+}
+
+void manageRelays() {
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  int ldrValue = analogRead(LDR_PIN);
+  int soilMoisture = analogRead(SOIL_SENSOR_PIN);
+
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  unsigned long currentMillis = millis();
+
+  // Fan 1 control
+  if (fan1Override) {
+    if (currentMillis - fan1OverrideTime > 5000) { // 5 seconds override
+      fan1Override = false;
+    }
+  } else {
+    if (humidity > 85.0) {
+      digitalWrite(FAN1_RELAY_PIN, LOW);
+      Serial.println("Fan 1 ON (Automatic - High Humidity)");
+    } else {
+      digitalWrite(FAN1_RELAY_PIN, HIGH);
+      Serial.println("Fan 1 OFF (Automatic - Normal Humidity)");
+    }
+  }
+
+  // Fan 2 control
+  if (fan2Override) {
+    if (currentMillis - fan2OverrideTime > 5000) {
+      fan2Override = false;
+    }
+  } else {
+    if (temperature > 35.0) {
+      digitalWrite(FAN2_RELAY_PIN, LOW);
+      Serial.println("Fan 2 ON (Automatic - High Temperature)");
+    } else {
+      digitalWrite(FAN2_RELAY_PIN, HIGH);
+      Serial.println("Fan 2 OFF (Automatic - Normal Temperature)");
+    }
+  }
+
+  // LED control
+  if (ledOverride) {
+    if (currentMillis - ledOverrideTime > 5000) {
+      ledOverride = false;
+    }
+  } else {
+    if (ldrValue < 2400) {
+      digitalWrite(LED_RELAY_PIN, HIGH);
+      Serial.println("LED OFF (Automatic - Light)");
+    } else {
+      digitalWrite(LED_RELAY_PIN, LOW);
+      Serial.println("LED ON (Automatic - Dark)");
+    }
+  }
+
+  // Water pump control
+  if (pumpOverride) {
+    if (currentMillis - pumpOverrideTime > 5000) {
+      pumpOverride = false;
+    }
+  } else {
+    if (soilMoisture < 3000) {
+      digitalWrite(PUMP_RELAY_PIN, HIGH);
+      Serial.println("Pump OFF (Automatic - Soil Dry)");
+    } else {
+      digitalWrite(PUMP_RELAY_PIN, LOW);
+      Serial.println("Pump ON (Automatic - Soil Wet)");
+    }
+  }
+}
+
+// Function to send sensor data to labels and update LCD display
+void updateLabels() {
+  static unsigned long lastUpdateTime = 0;
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - lastUpdateTime >= 5000) {
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
+
+    if (!isnan(temperature) && !isnan(humidity)) {
+      Blynk.virtualWrite(V5, temperature);
+      Blynk.virtualWrite(V6, humidity);
+      lastUpdateTime = currentMillis;
+    }
+  }
+}
+
+// Function to update the LCD display with DHT11 sensor data
+void updateLCD() {
+  static unsigned long lastUpdateTime = 0;  // Time when LCD was last updated
+  unsigned long currentMillis = millis();  // Get current time
+
+  // Update the LCD only if 2 seconds have passed
+  if (currentMillis - lastUpdateTime >= 2000) {
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
+
+    if (!isnan(temperature) && !isnan(humidity)) {
+      lcd.setCursor(0, 0);  // Set cursor to first row, first column
+      lcd.print("Temp: " + String(temperature) + " C");
+      lcd.setCursor(0, 1);  // Set cursor to second row, first column
+      lcd.print("Humid: " + String(humidity) + " %");
+
+      // Update last update time
+      lastUpdateTime = currentMillis;
+    }
+  }
+}
+
+
+// Blynk virtual pin handlers for manual override
+BLYNK_WRITE(V1) {
+  if (param.asInt()) {
+    fan1Override = true;
+    fan1OverrideTime = millis();
+    digitalWrite(FAN1_RELAY_PIN, LOW);
+    Serial.println("Fan 1 ON (Manual)");
+  } else {
+    fan1Override = false;
+    digitalWrite(FAN1_RELAY_PIN, HIGH);  // Return to automatic mode
+    Serial.println("Fan 1 OFF (Manual Override Released)");
+  }
+}
+
+BLYNK_WRITE(V2) {
+  if (param.asInt()) {
+    fan2Override = true;
+    fan2OverrideTime = millis();
+    digitalWrite(FAN2_RELAY_PIN, LOW);
+    Serial.println("Fan 2 ON (Manual)");
+  } else {
+    fan2Override = false;
+    digitalWrite(FAN2_RELAY_PIN, HIGH);  // Return to automatic mode
+    Serial.println("Fan 2 OFF (Manual Override Released)");
+  }
+}
+
+BLYNK_WRITE(V3) {
+  if (param.asInt()) {
+    ledOverride = true;
+    ledOverrideTime = millis();
+    digitalWrite(LED_RELAY_PIN, LOW);
+    Serial.println("LED ON (Manual)");
+  } else {
+    ledOverride = false;
+    digitalWrite(LED_RELAY_PIN, HIGH);  // Return to automatic mode
+    Serial.println("LED OFF (Manual Override Released)");
+  }
+}
+
+BLYNK_WRITE(V4) {
+  if (param.asInt()) {
+    pumpOverride = true;
+    pumpOverrideTime = millis();
+    digitalWrite(PUMP_RELAY_PIN, LOW);
+    Serial.println("Pump ON (Manual)");
+  } else {
+    pumpOverride = false;
+    digitalWrite(PUMP_RELAY_PIN, HIGH);  // Return to automatic mode
+    Serial.println("Pump OFF (Manual Override Released)");
+  }
+}
+BLYNK_WRITE(V5) {
+  float temperature = dht.readTemperature();
+  if (!isnan(temperature)) {
+    Blynk.virtualWrite(V5, temperature);  // Send just the temperature value
+  }
+}
+
+BLYNK_WRITE(V6) {
+  float humidity = dht.readHumidity();
+  if (!isnan(humidity)) {
+    Blynk.virtualWrite(V6, humidity);  // Send just the humidity value
+  }
+}
