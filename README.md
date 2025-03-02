@@ -2,8 +2,6 @@
 
 IoT-based automated greenhouse using ESP32 for environmental control.
 
-![Greenhouse Model](/assets/images/view-1.png)
-
 ## 🌟 Key Features
 - 🌡️ Monitors temperature, humidity, soil moisture, and light
 - 🌱 Plant hydration check with soil sensor
