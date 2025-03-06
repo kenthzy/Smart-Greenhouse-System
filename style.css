@@ -145,7 +145,7 @@ footer {
     color: white;
     padding: 2rem;
     margin-top: 3rem;
-    border-radius: 10px;
+    
     text-align: center;
 }
 
@@ -161,7 +161,6 @@ footer h3 {
 footer p {
     font-size: 1.1rem;
     line-height: 1.6;
-    margin-bottom: 1.5rem;
     color: var(--accent);
 }
 
