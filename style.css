@@ -59,8 +59,8 @@ p, li {
 }
 
 ul, ol {
-    padding-left: 1.5rem;
-    margin-bottom: 1.2rem;
+  padding-left: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .images {
@@ -76,6 +76,7 @@ ul, ol {
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   transition: transform 0.2s ease-in-out;
+  background: transparent; 
 }
 
 .images img:hover {
@@ -110,9 +111,12 @@ tr:last-child td {
   border-bottom: none;
 }
 
-tr:hover {
-  background-color: rgba(var(--primary), 0.05); 
+tr {
   transition: background-color 0.2s ease;
+}
+
+tr:hover {
+  background-color: rgba(43, 140, 103, 0.05); 
 }
 
 pre {
@@ -131,17 +135,16 @@ code {
 }
 
 .diagram {
-  background: white;
-  border-radius: var(--border-radius);
-  padding: 1.2rem;
-  box-shadow: var(--box-shadow);
+  background: transparent; 
+  padding: 0; 
   margin: 1.5rem 0;
 }
 
 .diagram img {
   width: 100%;
   height: auto;
-  border-radius: calc(var(--border-radius) / 2);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
 }
 
 a {
