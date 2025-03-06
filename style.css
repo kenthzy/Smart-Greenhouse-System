@@ -143,9 +143,7 @@ li {
 footer {
     background-color: var(--primary);
     color: white;
-    padding: 2rem;
     margin-top: 3rem;
-    
     text-align: center;
 }
 
