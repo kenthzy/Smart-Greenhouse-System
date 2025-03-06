@@ -145,6 +145,7 @@ footer {
     color: white;
     margin-top: 3rem;
     text-align: center;
+    border-radius: 10px;
 }
 
 footer h3 {
